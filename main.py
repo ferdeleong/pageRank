@@ -32,3 +32,49 @@ for i, outbound_links in links.items():
         H[i - 1][j - 1] = round(1 / len(outbound_links), 3)
         
 print_matrix(H)
+
+# Create the column vector 'e'
+e = np.ones((n, 1))
+
+# Create the column vector 'a' indicating pages with no outbound links
+a = np.zeros((n, 1))
+
+# Find pages with no outbound links and set 'a' accordingly
+for i in range(n):
+    if np.sum(H[i]) == 0:
+        a[i] = 1
+
+# Calculate matrix S
+S = H + (1 / n) * np.dot(a, e.T)
+
+print("Matrix S:")
+print_matrix(S)
+
+alpha_15 = 0.15
+alpha_50 = 0.5
+alpha_85 = 0.85
+
+G_15 = alpha_15*(S) + ((1 - alpha_15)*(1/n)*e*e.T) # When α is 0.15
+G_50 = alpha_50*(S) + ((1 - alpha_50)*(1/n)*e*e.T) # When α is 0.5
+G_85 = alpha_85*(S) + ((1 - alpha_85)*(1/n)*e*e.T) # When α is 0.85
+
+print("When α is 0.15")
+print_matrix(G_15)
+
+print("When α is 0.5")
+print_matrix(G_50)
+
+print("When α is 0.85")
+print_matrix(G_85)
+
+print("When α is 0.15")
+for row in G_15:
+    print(sum(row))
+    
+print("When α is 0.5")
+for row in G_50:
+    print(sum(row))
+
+print("When α is 0.85")
+for row in G_85:
+    print(sum(row))
