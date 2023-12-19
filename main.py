@@ -1,27 +1,10 @@
 import numpy as np
 from scipy.sparse import csc_matrix
 
-def page_rank(pi0, H, n, alpha, epsilon):
-    row_sum_vector = np.sum(H, axis=1).A1  # Get row sums for H
-    non_zero_rows = np.where(row_sum_vector != 0)[0]
-    zero_rows = np.where(row_sum_vector == 0)[0]
-
-    a = np.zeros(n)
-    a[zero_rows] = 1
-
-    k = 0
-    residual = 1
-    pi = pi0.copy()
-
-    while residual >= epsilon:
-        prev_pi = pi.copy()
-        k += 1
-        pi = alpha * pi.dot(H) + (alpha * (pi.dot(a) + 1 - alpha)) * (np.ones(n) / n)
-        residual = np.linalg.norm(pi - prev_pi, ord=1)
-
-    return pi, k
-
-# Example usage
+def print_matrix(matrix):
+  #Funtion to print matrixes, we'll use it throughout
+  for row in matrix:
+    print(row)
 
 #Dictionay
 links = {
@@ -34,7 +17,7 @@ links = {
     7: [1, 4, 6, 9],
     8: [2,3,7,8],
     9: [1, 3, 5, 7],
-    10: [2, 4, 6, 9],
+    10: [],
 }
 
 # Find the maximum page number from the links
@@ -47,16 +30,51 @@ H = np.zeros((n, n))
 for i, outbound_links in links.items():
     for j in outbound_links:
         H[i - 1][j - 1] = round(1 / len(outbound_links), 3)
-H = H / H.sum(axis=1)[:, np.newaxis]  # Normalize rows to ensure it is row-stochastic
+        
+print_matrix(H)
 
-pi0 = np.ones(n) / n  # Starting vector (usually set to the uniform vector)
-alpha = 0.9  # Scaling parameter
-epsilon = 1e-8  # Convergence tolerance
+# Create the column vector 'e'
+e = np.ones((n, 1))
 
-# Convert H to a sparse matrix for efficiency
-H_sparse = csc_matrix(H)
+# Create the column vector 'a' indicating pages with no outbound links
+a = np.zeros((n, 1))
 
-# Run the PageRank algorithm
-pagerank_vector, iterations = page_rank(pi0, H_sparse, n, alpha, epsilon)
-print("PageRank vector:", pagerank_vector)
-print("Number of iterations:", iterations)
+# Find pages with no outbound links and set 'a' accordingly
+for i in range(n):
+    if np.sum(H[i]) == 0:
+        a[i] = 1
+
+# Calculate matrix S
+S = H + (1 / n) * np.dot(a, e.T)
+
+print("Matrix S:")
+print_matrix(S)
+
+alpha_15 = 0.15
+alpha_50 = 0.5
+alpha_85 = 0.85
+
+G_15 = alpha_15*(S) + ((1 - alpha_15)*(1/n)*e*e.T) # When α is 0.15
+G_50 = alpha_50*(S) + ((1 - alpha_50)*(1/n)*e*e.T) # When α is 0.5
+G_85 = alpha_85*(S) + ((1 - alpha_85)*(1/n)*e*e.T) # When α is 0.85
+
+print("When α is 0.15")
+print_matrix(G_15)
+
+print("When α is 0.5")
+print_matrix(G_50)
+
+print("When α is 0.85")
+print_matrix(G_85)
+
+print("When α is 0.15")
+for row in G_15:
+    print(sum(row))
+    
+print("When α is 0.5")
+for row in G_50:
+    print(sum(row))
+
+print("When α is 0.85")
+for row in G_85:
+    print(sum(row))
