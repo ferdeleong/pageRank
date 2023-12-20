@@ -78,3 +78,69 @@ for row in G_50:
 print("When α is 0.85")
 for row in G_85:
     print(sum(row))
+    
+def pagerank_iteration(G, alpha, pi):
+    # Vector fixed point iteration
+    # @ represents a matrix multiplication
+    return alpha * G.T @ pi
+
+def pagerank_solver(G, alpha, tol=1e-6, max_iter=1000):
+    # Solve for PageRank vector using iterative method
+    pi = np.ones(len(G)) / len(G)
+
+    for i in range(max_iter):
+
+        #run iteration
+        next_pi = pagerank_iteration(G, alpha, pi)
+
+        #check for convergence
+        if np.linalg.norm(next_pi - pi, 1) < tol:
+            break
+
+        #set current pagerank vector
+        pi = next_pi
+        convergence_speed = i
+
+    # Normalize the final result to make it a probability distribution
+    return pi / sum(pi), convergence_speed
+
+def showRanking(pagerank_vector):
+    #Funtion with the purpose of showing the final pagerank vector
+    pagerank_vector = sorted(enumerate(pagerank_vector), key=lambda x: x[1],reverse=True)
+
+    for index, value in pagerank_vector:
+        print(f"Page: {index+1}, Value: {value}")
+
+# Solve for PageRank vector
+pagerank_vector_15, convergence_speed_15 = pagerank_solver(G_15, alpha_15)
+pagerank_vector_50, convergence_speed_50 = pagerank_solver(G_50, alpha_50)
+pagerank_vector_85, convergence_speed_85 = pagerank_solver(G_85, alpha_85)
+
+# Display the PageRank vector
+print("PageRank Vector when α is 0.15:")
+showRanking(pagerank_vector_15)
+print("Convergence Speed: ", convergence_speed_15)
+
+print("\nPageRank Vector when α is 0.5:")
+showRanking(pagerank_vector_50)
+print("Convergence Speed: ", convergence_speed_50)
+
+print("\nPageRank Vector when α is 0.85:")
+showRanking(pagerank_vector_85)
+print("Convergence Speed: ", convergence_speed_85)
+
+print(np.dot(G_15.T, pagerank_vector_15))
+print(pagerank_vector_15)
+
+convergence_speeds = [convergence_speed_15, convergence_speed_50, convergence_speed_85]
+alpha_values = [0.15, 0.5, 0.85]
+
+plt.figure(figsize=(10, 6))
+
+plt.scatter(alpha_values, convergence_speeds, color=['blue', 'red', 'green'])
+plt.plot(alpha_values, convergence_speeds, linestyle='--', color='black')
+
+plt.xlabel('Alpha Values')
+plt.ylabel('Convergence Speed')
+plt.title('Convergence Speed vs. Alpha Values')
+plt.show()
